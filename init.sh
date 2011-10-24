@@ -1,5 +1,6 @@
 source $HOME/.bash/scripts/other.sh
 source $HOME/.bash/scripts/export.sh
+source $HOME/.bash/scripts/rvm.sh
 source $HOME/.bash/scripts/alias.sh
 source $HOME/.bash/scripts/options.sh
 
