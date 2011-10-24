@@ -1,4 +1,4 @@
-export PATH="./bin:$HOME/.rbenv/bin:$HOME/Sites/codeplane/scripts:$HOME/.node/current/bin:$HOME/bin:$HOME/.bash/bin:$HOME/local/bin:$HOME/local/flex4/bin:/usr/local/bin:/usr/local/sbin:$PATH"
+export PATH="./bin:$HOME/.rbenv/bin:$HOME/.node/current/bin:$HOME/bin:$HOME/.bash/bin:$HOME/local/bin:$HOME/local/flex4/bin:/usr/local/bin:/usr/local/sbin:$PATH"
 export CLASSPATH="/usr/local/rhino:$CLASSPATH"
 export EVENT_NOKQUEUE=1
 export MANPATH=/usr/local/git/man:$MANPATH
@@ -10,7 +10,7 @@ export HISTIGNORE="&"
 export HISTSIZE=${HISTFILESIZE}
 export GREP_OPTIONS="--color=auto"
 export GREP_COLOR="4;33"
-export CDPATH=.:~:~/Sites:~/Sites/github
+export CDPATH=.:~:~/Sites/rails_app:~/Sites/php:~/Sites:~/GitHub
 export CDHISTORY="/tmp/cd-${USER}"
 
 export RUBYLIB='.'
