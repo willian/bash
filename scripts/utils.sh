@@ -57,14 +57,14 @@ fi
 #
 tunnel() {
   if [[ $# = 0 ]]; then
-    echo "Opening dynamic tunnel to simplesideias..."
-    sudo ssh -vND localhost:666 fnando@simplesideias.com.br
+    echo "Opening dynamic tunnel to willianfernandes..."
+    sudo ssh -vND localhost:666 willian@willianfernandes.com.br
   elif [[ $# = 2 ]]; then
     echo "Forwarding port $2 to $1..."
     ssh -L $2:localhost:$2 $1
   else
     echo "Usage:"
-    echo "  tunnel                         # Use simplesideias as proxy server"
+    echo "  tunnel                         # Use willianfernandes as proxy server"
     echo "  tunnel example.com 2345        # Redirect port from localhost:2345 to example.com"
     echo ""
     echo "Common ports:"

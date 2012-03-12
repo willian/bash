@@ -1,9 +1,10 @@
 export PATH="./bin:$HOME/.rbenv/bin:$HOME/.node/current/bin:$HOME/bin:$HOME/.bash/bin:$HOME/local/bin:$HOME/local/flex4/bin:/usr/local/bin:/usr/local/sbin:$PATH"
+export NODE_PATH="/usr/local/lib/node_modules:$NODE_PATH"
 export CLASSPATH="/usr/local/rhino:$CLASSPATH"
 export EVENT_NOKQUEUE=1
 export MANPATH=/usr/local/git/man:$MANPATH
-export EDITOR="mate -w"
-export SVN_EDITOR="mate -w"
+export EDITOR="vim"
+export SVN_EDITOR="vim"
 export HISTCONTROL=ignoreboth
 export HISTFILESIZE=100000
 export HISTIGNORE="&"
