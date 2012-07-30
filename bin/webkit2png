@@ -1,9 +1,9 @@
 #!/usr/bin/python
 
-# webkit2png - makes screenshots of webpages
+# webkit2png - makes screenshots of web pages
 # http://www.paulhammond.org/webkit2png
 
-__version__ = "0.5"
+__version__ = "0.6 beta"
 
 # Copyright (c) 2009 Paul Hammond
 #
@@ -25,7 +25,7 @@ __version__ = "0.5"
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #
-                
+
 import sys
 import optparse
 
@@ -36,9 +36,7 @@ try:
   import objc
 except ImportError:
   print "Cannot find pyobjc library files.  Are you sure it is installed?"
-  sys.exit() 
-
-
+  sys.exit()
 
 class AppDelegate (Foundation.NSObject):
     # what happens when the app starts up
@@ -151,20 +149,27 @@ class WebkitLoad (Foundation.NSObject, WebKit.protocols.WebFrameLoadDelegate):
             webview.setDrawsBackground_(objc.NO)
 
         webview.setFrame_(rect)
-    
-    def resizeWebview(self,view):
-        view.window().display()
-        view.window().setContentSize_(view.bounds().size)
-        view.setFrame_(view.bounds())
 
     def captureView(self,view):
+        bounds = view.bounds()
+        if bounds.size.height > self.options.UNSAFE_max_height:
+            print >> sys.stderr, "Error: page height greater than %s, clipping to avoid crashing windowserver." % self.options.UNSAFE_max_height
+            bounds.size.height = self.options.UNSAFE_max_height
+        if bounds.size.width > self.options.UNSAFE_max_width:
+            print >> sys.stderr, "Error: page width greater than %s, clipping to avoid crashing windowserver." % self.options.UNSAFE_max_width
+            bounds.size.width = self.options.UNSAFE_max_width
+
+        view.window().display()
+        view.window().setContentSize_(Foundation.NSSize(bounds.size.width, self.options.initHeight))
+        view.setFrame_(bounds)
+
         if hasattr(view, "bitmapImageRepForCachingDisplayInRect_"):
-            bitmapdata = view.bitmapImageRepForCachingDisplayInRect_(view.bounds())
-            view.cacheDisplayInRect_toBitmapImageRep_(view.bounds(), bitmapdata)
+            bitmapdata = view.bitmapImageRepForCachingDisplayInRect_(bounds)
+            view.cacheDisplayInRect_toBitmapImageRep_(bounds, bitmapdata)
         else:
             view.lockFocus()
             bitmapdata = AppKit.NSBitmapImageRep.alloc()
-            bitmapdata.initWithFocusedViewRect_(view.bounds())
+            bitmapdata.initWithFocusedViewRect_(bounds)
             view.unlockFocus()
         return bitmapdata
 
@@ -180,8 +185,6 @@ class WebkitLoad (Foundation.NSObject, WebKit.protocols.WebFrameLoadDelegate):
     def doGrab(self,timer):
             webview = timer.userInfo()
             view = webview.mainFrame().frameView().documentView()
-            
-            self.resizeWebview(view)
 
             URL = webview.mainFrame().dataSource().initialRequest().URL().absoluteString()
             filename = self.makeFilename(URL, self.options) 
@@ -198,7 +201,7 @@ def main():
     # parse the command line
     usage = """%prog [options] [http://example.net/ ...]
 
-examples:
+Examples:
 %prog http://google.com/            # screengrab google
 %prog -W 1000 -H 1000 http://google.com/ # bigger screengrab of google
 %prog -T http://google.com/         # just the thumbnail screengrab
@@ -209,46 +212,71 @@ examples:
 
     cmdparser = optparse.OptionParser(usage,version=("webkit2png "+__version__))
     # TODO: add quiet/verbose options
-    cmdparser.add_option("-W", "--width",type="float",default=800.0,
-       help="initial (and minimum) width of browser (default: 800)")
-    cmdparser.add_option("-H", "--height",type="float",default=600.0,
-       help="initial (and minimum) height of browser (default: 600)")
-    cmdparser.add_option("--clipwidth",type="float",default=200.0,
-       help="width of clipped thumbnail (default: 200)",
-       metavar="WIDTH")
-    cmdparser.add_option("--clipheight",type="float",default=150.0,
-       help="height of clipped thumbnail (default: 150)",
-       metavar="HEIGHT")
-    cmdparser.add_option("-z", "--zoom",type="float",default=1.0,
-       help="full page zoom of browser (default: 1.0)")
-    cmdparser.add_option("-s", "--scale",type="float",default=0.25,
-       help="scale factor for thumbnails (default: 0.25)")
-    cmdparser.add_option("-m", "--md5", action="store_true",
-       help="use md5 hash for filename (like del.icio.us)")
-    cmdparser.add_option("-o", "--filename", type="string",default="",
-       metavar="NAME", help="save images as NAME-full.png,NAME-thumb.png etc")
-    cmdparser.add_option("-F", "--fullsize", action="store_true",
-       help="only create fullsize screenshot")
-    cmdparser.add_option("-T", "--thumb", action="store_true",
-       help="only create thumbnail sreenshot")
-    cmdparser.add_option("-C", "--clipped", action="store_true",
-       help="only create clipped thumbnail screenshot")
-    cmdparser.add_option("-d", "--datestamp", action="store_true",
-       help="include date in filename")
-    cmdparser.add_option("-D", "--dir",type="string",default="./",
-       help="directory to place images into")
-    cmdparser.add_option("--delay",type="float",default=0,
-       help="delay between page load finishing and screenshot")
-    cmdparser.add_option("--noimages", action="store_true",
-       help="don't load images")
-    cmdparser.add_option("--transparent", action="store_true",
-       help="render output on a transparent background (be sure to have a transparent background defined in the html)", default=False)
-    cmdparser.add_option("--nojs", action="store_true",
-       help="disable JavaScript support")
     cmdparser.add_option("--debug", action="store_true",
        help=optparse.SUPPRESS_HELP)
-    cmdparser.add_option("--js", type="string", default=None,
-       help="JavaScript to execute when the window finishes loading")
+
+    # warning: setting these too high can crash your window server
+    cmdparser.add_option("--UNSAFE-max-height", type="int",default=30000,
+       help=optparse.SUPPRESS_HELP)
+    cmdparser.add_option("--UNSAFE-max-width", type="int",default=30000,
+       help=optparse.SUPPRESS_HELP)
+
+    group = optparse.OptionGroup(cmdparser, "Browser Window Options")
+    group.add_option("-W", "--width",type="float",default=800.0,
+       help="initial (and minimum) width of browser (default: 800)")
+    group.add_option("-H", "--height",type="float",default=600.0,
+       help="initial (and minimum) height of browser (default: 600)")
+    group.add_option("-z", "--zoom",type="float",default=1.0,
+       help="zoom level of browser, equivalent to \"Zoom In\" and \"Zoom Out\" in \"View\" menu (default: 1.0)")
+    cmdparser.add_option_group(group)
+
+    group = optparse.OptionGroup(cmdparser, "Output size options")
+    group.add_option("-F", "--fullsize", action="store_true",
+       help="only create fullsize screenshot")
+    group.add_option("-T", "--thumb", action="store_true",
+       help="only create thumbnail sreenshot")
+    group.add_option("-C", "--clipped", action="store_true",
+       help="only create clipped thumbnail screenshot")
+    group.add_option("--clipwidth",type="float",default=200.0,
+       help="width of clipped thumbnail (default: 200)",
+       metavar="WIDTH")
+    group.add_option("--clipheight",type="float",default=150.0,
+       help="height of clipped thumbnail (default: 150)",
+       metavar="HEIGHT")
+    group.add_option("-s", "--scale",type="float",default=0.25,
+       help="scale factor for thumbnails (default: 0.25)")
+    cmdparser.add_option_group(group)
+
+    group = optparse.OptionGroup(cmdparser, "Output filename options")
+    group.add_option("-D", "--dir",type="string",default="./",
+       help="directory to place images into")
+    group.add_option("-o", "--filename", type="string",default="",
+       metavar="NAME", help="save images as NAME-full.png,NAME-thumb.png etc")
+    group.add_option("-m", "--md5", action="store_true",
+       help="use md5 hash for filename (like del.icio.us)")
+    group.add_option("-d", "--datestamp", action="store_true",
+       help="include date in filename")
+    cmdparser.add_option_group(group)
+
+    group = optparse.OptionGroup(cmdparser, "Web page functionality")
+    group.add_option("--delay",type="float",default=0,
+       help="delay between page load finishing and screenshot")
+    group.add_option("--js", type="string", default=None,
+       help="JavaScript to execute when the window finishes loading (example: --js='document.bgColor=\"red\";')")
+    group.add_option("--noimages", action="store_true",
+       help=optparse.SUPPRESS_HELP)
+    group.add_option("--no-images", action="store_true",
+       help="don't load images")
+    group.add_option("--nojs", action="store_true",
+       help=optparse.SUPPRESS_HELP)
+    group.add_option("--no-js", action="store_true",
+       help="disable JavaScript support")
+    group.add_option("--transparent", action="store_true",
+       help="render output on a transparent background (requires a web page with a transparent background)", default=False)
+    group.add_option("--user-agent", type="string", default=False,
+       help="set user agent header")
+    cmdparser.add_option_group(group)
+
     (options, args) = cmdparser.parse_args()
     if len(args) == 0:
         cmdparser.print_usage()
@@ -257,6 +285,15 @@ examples:
         if len(args) != 1 or args[0] == "-":
           print "--filename option requires exactly one url"
           return
+
+    # deprecated options
+    if options.nojs:
+       print >> sys.stderr, 'Warning: --nojs will be removed in webkit2png 1.0. Please use --no-js.'
+       options.no_js = True
+    if options.noimages:
+       print >> sys.stderr, 'Warning: --noimages will be removed in webkit2png 1.0. Please use --no-images.'
+       options.no_images = True
+
     if options.scale == 0:
       cmdparser.error("scale cannot be zero")
     # make sure we're outputing something
@@ -293,9 +330,11 @@ examples:
     # turn off scrolling so the content is actually x wide and not x-15
     webview.mainFrame().frameView().setAllowsScrolling_(objc.NO)
 
+    if options.user_agent:
+      webview.setCustomUserAgent_(options.user_agent)
     webview.setPreferencesIdentifier_('webkit2png')
-    webview.preferences().setLoadsImagesAutomatically_(not options.noimages)
-    webview.preferences().setJavaScriptEnabled_(not options.nojs)
+    webview.preferences().setLoadsImagesAutomatically_(not options.no_images)
+    webview.preferences().setJavaScriptEnabled_(not options.no_js)
 
     if options.zoom != 1.0:
       webview._setZoomMultiplier_isTextOnly_(options.zoom, False)
