@@ -11,7 +11,7 @@ export HISTIGNORE="&"
 export HISTSIZE=${HISTFILESIZE}
 export GREP_OPTIONS="--color=auto"
 export GREP_COLOR="4;33"
-export CDPATH=.:~:~/Sites/rails_app:~/Sites/php:~/Sites:~/GitHub
+export CDPATH=.:~:~/Projects:~/GitHub:~/VMs
 export CDHISTORY="/tmp/cd-${USER}"
 
 export RUBYLIB='.'
