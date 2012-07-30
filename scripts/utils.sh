@@ -1,25 +1,3 @@
-# Set window title
-title() {
-  echo -ne "\033]0;$@\007";
-}
-
-# Usage: railsapp my_app
-#        railsapp my_app mysql
-railsapp() {
-  local template_path="https://raw.github.com/willian/rails-app-template/master/app.rb"
-  if [ $# = 1 ]; then
-    rails new $1 -T -m $template_path
-    cd $1
-  elif [ $# = 2 ]; then
-    rails new $1 -T -d $2 -m $template_path
-    cd $1
-  else
-    echo "Usage:";
-    echo "    railsapp <app_name>         ~> will create a rails 3 app and don't will use mysql";
-    echo "    railsapp <app_name> mysql   ~> will create a rails 3 app and will use mysql";
-  fi
-}
-
 # reload source
 reload() {
   source ~/.bash_profile;
@@ -41,11 +19,13 @@ function rake {
   fi
 }
 
-if [ -f $CDHISTORY ]; then
-  dir=$(cat $CDHISTORY)
+if [[ "$(uname)" != "Darwin" ]]; then
+  if [ -f "$CDHISTORY" ]; then
+    dir=$(cat $CDHISTORY)
 
-  if [ -d "$dir" ]; then
-    cd "$dir" && clear
+    if [ -d "$dir" ]; then
+      cd "$dir" && clear
+    fi
   fi
 fi
 
@@ -93,15 +73,4 @@ gzipped() {
 
   echo -e $message
   return 0
-}
-
-# Schedule alarm. Will display growl
-# notification and beep.
-#
-#   $ alarm "now + 2 hours" "Your time has finished"
-#
-# Quotes required, sorry!
-#
-alarm() {
-  echo "afplay /System/Library/Sounds/Basso.aiff && /usr/local/bin/growlnotify -t Alarm -s -d alarm -a /Applications/iCal.app -m '$2'" | at $1
 }

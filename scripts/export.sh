@@ -1,12 +1,11 @@
-export PATH="/bin:$HOME/.node/current/bin:$HOME/bin:$HOME/.bash/bin:$HOME/local/bin:$HOME/local/flex4/bin:/usr/local/bin:/usr/local/sbin:$PATH"
-export NODE_PATH="/usr/local/lib/node_modules:$NODE_PATH"
-export CLASSPATH="/usr/local/rhino:$CLASSPATH"
+export PATH="./bin:$HOME/.bash/bin:$HOME/bin:$HOME/local/bin:$HOME/local/ruby/gems/bin:$HOME/local/sbin:/bin:/sbin:/usr/bin:/usr/local/bin:/usr/local/sbin:/usr/sbin:/usr/X11/bin"
+export INSTALL_DIR="$HOME/local"
 export EVENT_NOKQUEUE=1
 export MANPATH=/usr/local/git/man:$MANPATH
-export EDITOR="vim"
+export EDITOR=vim
 export SVN_EDITOR="vim"
 export HISTCONTROL=ignoreboth
-export HISTFILESIZE=100000
+export HISTFILESIZE=1000000
 export HISTIGNORE="&"
 export HISTSIZE=${HISTFILESIZE}
 export GREP_OPTIONS="--color=auto"
@@ -16,6 +15,8 @@ export CDHISTORY="/tmp/cd-${USER}"
 
 export RUBYLIB='.'
 export RUBYOPT=''
+export GEM_HOME="$HOME/local/ruby/gems"
+export GEM_PATH="$HOME/local/ruby/gems"
 
 export LESS_TERMCAP_mb=$'\E[04;33m'
 export LESS_TERMCAP_md=$'\E[04;33m'
@@ -31,14 +32,3 @@ export EC2_CERT="$EC2_HOME/cert.pem"
 export EC2_AMI_HOME="$EC2_HOME/ec2-ami-tools"
 export PATH="$EC2_HOME/bin:$EC2_AMI_HOME/bin:$PATH"
 export JAVA_HOME="/Library/Java/Home"
-
-export BLUE="\[\033[0;34m\]"
-export NO_COLOR="\[\e[0m\]"
-export GRAY="\[\033[1;30m\]"
-export GREEN="\[\033[0;32m\]"
-export LIGHT_GRAY="\[\033[0;37m\]"
-export LIGHT_GREEN="\[\033[1;32m\]"
-export LIGHT_RED="\[\033[1;31m\]"
-export RED="\[\033[0;31m\]"
-export WHITE="\[\033[1;37m\]"
-export YELLOW="\[\033[0;33m\]"
