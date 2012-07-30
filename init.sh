@@ -1,4 +1,5 @@
 source $HOME/.bash/scripts/export.sh
+# source $HOME/.bash/scripts/rbenv.sh
 source $HOME/.bash/scripts/rvm.sh
 source $HOME/.bash/scripts/alias.sh
 source $HOME/.bash/scripts/options.sh
