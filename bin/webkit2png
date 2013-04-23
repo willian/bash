@@ -3,9 +3,9 @@
 # webkit2png - makes screenshots of web pages
 # http://www.paulhammond.org/webkit2png
 
-__version__ = "0.6 beta"
+__version__ = "dev"
 
-# Copyright (c) 2009 Paul Hammond
+# Copyright (c) 2004-2013 Paul Hammond
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -43,7 +43,7 @@ class AppDelegate (Foundation.NSObject):
     def applicationDidFinishLaunching_(self, aNotification):
         webview = aNotification.object().windows()[0].contentView()
         webview.frameLoadDelegate().getURL(webview)
-        self.performSelector_withObject_afterDelay_( "timeout:", None, 60 )
+        self.performSelector_withObject_afterDelay_( "timeout:", None, self.timeout )
 
     def timeout_(self, obj):
         Foundation.NSLog("timed out!")
@@ -221,6 +221,13 @@ Examples:
     cmdparser.add_option("--UNSAFE-max-width", type="int",default=30000,
        help=optparse.SUPPRESS_HELP)
 
+    group = optparse.OptionGroup(cmdparser, "Network Options")
+    group.add_option("--timeout",type="float",default=60.0,
+       help="page load timeout (default: 60)")
+    group.add_option("--user-agent", type="string", default=False,
+       help="set user agent header")
+    cmdparser.add_option_group(group)
+
     group = optparse.OptionGroup(cmdparser, "Browser Window Options")
     group.add_option("-W", "--width",type="float",default=800.0,
        help="initial (and minimum) width of browser (default: 800)")
@@ -273,8 +280,6 @@ Examples:
        help="disable JavaScript support")
     group.add_option("--transparent", action="store_true",
        help="render output on a transparent background (requires a web page with a transparent background)", default=False)
-    group.add_option("--user-agent", type="string", default=False,
-       help="set user agent header")
     cmdparser.add_option_group(group)
 
     (options, args) = cmdparser.parse_args()
@@ -315,6 +320,7 @@ Examples:
     
     # create an app delegate
     delegate = AppDelegate.alloc().init()
+    delegate.timeout = options.timeout
     AppKit.NSApp().setDelegate_(delegate)
 
     # create a window
@@ -332,6 +338,9 @@ Examples:
 
     if options.user_agent:
       webview.setCustomUserAgent_(options.user_agent)
+    else:
+      webkit_version = Foundation.NSBundle.bundleForClass_(WebKit.WebView).objectForInfoDictionaryKey_(WebKit.kCFBundleVersionKey)[1:]
+      webview.setApplicationNameForUserAgent_("Safari/%s webkit2png/%s" % (webkit_version, __version__))
     webview.setPreferencesIdentifier_('webkit2png')
     webview.preferences().setLoadsImagesAutomatically_(not options.no_images)
     webview.preferences().setJavaScriptEnabled_(not options.no_js)
