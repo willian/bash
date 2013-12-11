@@ -36,13 +36,13 @@ __hellobits_prompt () {
   local PROMPT_COLOR=""
   local STATE=" "
   local NOTHING_TO_COMMIT="# Initial commit"
-  local BEHIND="# Your branch is behind"
-  local AHEAD="# Your branch is ahead"
-  local UNTRACKED="# Untracked files"
+  local BEHIND="Your branch is behind"
+  local AHEAD="Your branch is ahead"
+  local UNTRACKED="Untracked files"
   local DIVERGED="have diverged"
-  local CHANGED="# Changed but not updated"
-  local TO_BE_COMMITED="# Changes to be committed"
-  local CHANGES_NOT_STAGED="# Changes not staged for commit"
+  local CHANGED="Changed but not updated"
+  local TO_BE_COMMITED="Changes to be committed"
+  local CHANGES_NOT_STAGED="Changes not staged for commit"
   local LOG=`git log -1 2> /dev/null`
 
   if [[ "$RAILS_VERSION" ]]; then
@@ -72,7 +72,7 @@ __hellobits_prompt () {
       STATE=""
     elif [[ "$STATUS" =~ "$TO_BE_COMMITED" ]]; then
       PROMPT_COLOR="${RED}"
-      STATE=""
+      STATE="${STATE}${RED}-${NO_COLOR}"
     else
       PROMPT_COLOR="${GREEN}"
       STATE=""
@@ -82,9 +82,9 @@ __hellobits_prompt () {
       STATE="${STATE}${YELLOW}*${NO_COLOR}"
     fi
 
-    PS1="\n${RUBY_PROMPT}${BASE_COLOR}\w\a${NO_COLOR} ${PROMPT_COLOR}${BRANCH}${NO_COLOR}${STATE}${NO_COLOR}\n\$ "
+    PS1="\n${BASE_COLOR}\w\a${NO_COLOR} ${RUBY_PROMPT}(${PROMPT_COLOR}${BRANCH}${NO_COLOR}${STATE}${NO_COLOR})\n\$ "
   else
-    PS1="\n${RUBY_PROMPT}${BASE_COLOR}\w\a${NO_COLOR}\n\$ "
+    PS1="\n${BASE_COLOR}\w\a${NO_COLOR} ${RUBY_PROMPT}\n\$ "
   fi
 }
 
